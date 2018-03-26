@@ -59,9 +59,6 @@ if(NOT WIN32)
             ${PKG_LibEGL_LIBRARY_DIRS}
     )
 
-    message(STATUS LibEGL_INCLUDE_DIR " - " ${LibEGL_INCLUDE_DIR})
-    message(STATUS LibEGL_LIBRARY " - " ${LibEGL_LIBRARY})
-
     include(FindPackageHandleStandardArgs)
     find_package_handle_standard_args(LibEGL
         FOUND_VAR
