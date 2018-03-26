@@ -173,7 +173,8 @@ static struct my_window get_window(struct my_config config)
 
     window.gbmsurface = gbm_surface_create(config.dpy.gbmdev,
                                     256, 256,
-                                    GBM_FORMAT_XRGB8888,
+                                    //GBM_FORMAT_XRGB8888,
+                                    GBM_FORMAT_ARGB8888,
                                     GBM_BO_USE_RENDERING);
     if (!window.gbmsurface) {
         fprintf(stderr, "gbm_surface_create() failed.\n");
