@@ -131,33 +131,48 @@ static struct my_config get_config(struct my_display dpy)
     }
 
     // Find a config whose native visual ID is the desired GBM format.
+    int selected_config = -1;
     for (int i = 0; i < num_configs; ++i) {
         EGLint gbm_format;
+        EGLint blue_size, red_size, green_size, alpha_size;
 
         if (!eglGetConfigAttrib(dpy.egldisplay, configs[i],
                                 EGL_NATIVE_VISUAL_ID, &gbm_format)) {
             fprintf(stderr, "eglGetConfigAttrib() failed.\n");
             abort();
         }
+        
+        eglGetConfigAttrib(dpy.egldisplay, configs[i], EGL_RED_SIZE, &red_size);
+        eglGetConfigAttrib(dpy.egldisplay, configs[i], EGL_GREEN_SIZE, &green_size);
+        eglGetConfigAttrib(dpy.egldisplay, configs[i], EGL_BLUE_SIZE, &blue_size);
+        eglGetConfigAttrib(dpy.egldisplay, configs[i], EGL_ALPHA_SIZE, &alpha_size);
 
         // gbm_format is actually a fourcc code, constructed as
         //   __gbm_fourcc_code('A', 'R', '1', '5'), so it can be printed
         //   as string
         char gbm_format_str[8] = {0, 0, 0, 0,  0, 0, 0, 0};
         memcpy(gbm_format_str, &gbm_format, sizeof(EGLint));
-        printf("  %d-th GBM format: %s\n", i, gbm_format_str);
+        printf("  %d-th GBM format: %s;  sizes(RGBA) = %d,%d,%d,%d,\n",
+               i, gbm_format_str, red_size, green_size, blue_size, alpha_size);
 
         if (gbm_format == GBM_FORMAT_XRGB8888) {
-            config.eglconfig = configs[i];
-            free(configs);
-            return config;
+            if (selected_config == -1) {
+                selected_config = i;
+            }
         }
 
         if (gbm_format == GBM_FORMAT_ARGB8888) {
-            config.eglconfig = configs[i];
-            free(configs);
-            return config;
+            if (selected_config == -1) {
+                selected_config = i;
+            }
         }
+    }
+    
+    printf("Selected config: %d\n", selected_config);
+    if (selected_config >= 0) {
+        config.eglconfig = configs[selected_config];
+        free(configs);
+        return config;
     }
 
     // Failed to find a config with matching GBM format.
